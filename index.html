@@ -1,0 +1,43 @@
+<html>
+<head>
+<title>Cachier</title>
+<link type="text/css" rel="stylesheet" href="../basic.css" />
+<script type="application/javascript" src="../lib/json2.js"></script>
+<script type="application/javascript" src="cachier.js"></script>
+</head>
+<body>
+<h1>Cachier</h1>
+<pre style="background-color: #eee; width: 300px; padding: 5px;">
+<span style="color: darkblue;">var</span> obj = {
+    <span style="color: red;">"full"</span>: <span style="color: darkred;">"string"</span>,
+    <span style="color: red;">"arr"</span>:  [
+        <span style="color: blue;">123</span>, 
+        <span style="color: darkred;">"boom"</span> 
+    ]
+};
+</pre>
+<script type="application/javascript">
+	var obj = {
+		"full": "string",
+		"arr": [ 123, "boom" ],
+	};
+	document.write("<p>Set? <em>" + Cachier.set("example", obj) + "</em></p>");
+	document.write("<p>Get? <em>" + Cachier.get("example") + "</em></p>");
+	//document.write("<p>Delete? <em>" + Cachier.delete("example") + "</em></p>");
+	
+	var uno = null;
+	console.log(Cachier.set("uno", uno));
+	console.log(Cachier.get("uno"));
+
+	//Cachier.delete("example");
+	//Cachier.delete("uno");
+	
+	var foobar = null;
+	var stored = JSON.stringify(foobar);
+	console.log(stored + " (type: " + (typeof stored) + ")");
+	var retrieved = JSON.parse(stored);
+	console.log(retrieved + " (type: " + (typeof retrieved) + ")");
+	
+</script>
+</body>
+</htm>
