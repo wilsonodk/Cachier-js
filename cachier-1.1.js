@@ -5,22 +5,22 @@
  *	easily worked around, and that's where Cachier comes in. Cachier handles 
  *	serializing and unserializing the data that is passed to it. It also sets an
  *	expire time, so that data can be refreshed when needed. 
- *	Provides three public methods; get, set, and delete.
+ *	Provides three public methods; getItem, setItem, and removeItem.
  *
  *	JSON-js is required for use. https://github.com/douglascrockford/JSON-js
  *
  *	Example usage:
- *	var myData = Cachier.get('cachedItem');
+ *	var myData = Cachier.getItem('cachedItem');
  *	if (myData.result) {
  *		// Use your data which is now in myData.data
  *	} else {
  *		// The data is expired, go fetch data.
  *		var fetchedData = ...
  *		// Now store it
- *		Cachier.set('cachedItem', fetchedData);
+ *		Cachier.setItem('cachedItem', fetchedData);
  *	}
  *	// If needed, you can manually delete
- *	Cachier.delete('cachedItem');
+ *	Cachier.removeItem('cachedItem');
  */
 var Cachier = (function(Json) {
 	var module		= {},						// Return object for public methods
@@ -53,17 +53,17 @@ var Cachier = (function(Json) {
 	}
 
 	/**
-	 *	get public method
+	 *	getItem public method
 	 *	@param 	cacheId	A required string that is the key for the item in cache 
 	 *					to be retrieved.
 	 *	@return object	
 	 *		The return object has two or three values depending on the result 
-	 *		of the get. 
-	 *		@value result boolean	Whether the get request was successful
+	 *		of the getItem. 
+	 *		@value result boolean	Whether the getItem request was successful
 	 *		@value data	  mixed		The data that was stored
 	 *		@value error  string	Message about the error that was thrown
 	 */
-	module.get = function(cacheId) {
+	module.getItem = function(cacheId) {
 		var cid	= prepareCids(cacheId),
 			// Need some numbers that represent dates
 			now	= (new Date()).getTime(),
@@ -121,7 +121,7 @@ var Cachier = (function(Json) {
 		}
 		else {
 			// It's expired, so delete and return false
-			Cachier.delete(cacheId);
+			Cachier.removeItem(cacheId);
 			myData.error = "Expired";
 			return myData;
 		}
@@ -129,7 +129,7 @@ var Cachier = (function(Json) {
 		return myData;
 	};
 	/**
-	 * 	set public method
+	 * 	setItem public method
 	 *	@param	cacheId	A required string that is the key for the item.
  	 *	@param	data	A required mixed value, this is the data to be stored.
 	 *					All types except functions are allowed. 
@@ -138,7 +138,7 @@ var Cachier = (function(Json) {
 	 *	@return	boolean
 	 *		True if the value was stored, false if it wasn't
 	 */
-	module.set = function(cacheId, data, expire) {
+	module.setItem = function(cacheId, data, expire) {
 		// Use the defaultTime if expire is not set
 		var expireTime	= expire || defaultTime;
 		var dataType 	= typeof data;
@@ -195,12 +195,12 @@ var Cachier = (function(Json) {
 		return true;
 	};
 	/**
-	 *	delete public method
+	 *	removeItem public method
 	 *	@param	cacheId A required string, the cache key to be deleted.
 	 *	@return boolean
 	 *		True if the content was deleted, false if it wasn't
  	 */
-	module.delete = function(cacheId) {		
+	module.removeItem = function(cacheId) {		
 		try {
 			// Remove all three items
 			var cid	= prepareCids(cacheId);
