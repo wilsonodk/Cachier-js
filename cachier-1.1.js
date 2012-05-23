@@ -73,13 +73,14 @@ var Cachier = (function(Json) {
 				result: false,
 				data:	"",
 				error:	null
-			};
+			},
+			dataType, data;
 		
 		// Check if our cached content has expired
 		if (now < expireDate) {
 			// OK, we can proceed
-			var dataType = ls.getItem(cid.type),
-				data	 = ls.getItem(cid.data);
+			dataType = ls.getItem(cid.type);
+			data	 = ls.getItem(cid.data);
 			
 			switch (dataType) {
 				case "object":
@@ -140,8 +141,9 @@ var Cachier = (function(Json) {
 	 */
 	module.setItem = function(cacheId, data, expire) {
 		// Use the defaultTime if expire is not set
-		var expireTime	= expire || defaultTime;
-		var dataType 	= typeof data;
+		var expireTime	= expire || defaultTime,
+			dataType 	= typeof data,
+			cid;
 		
 		// cacheId should be a string
 		if (typeof cacheId != "string") return false;
@@ -173,7 +175,7 @@ var Cachier = (function(Json) {
 		
 		// Let's double-check we are a string
 		if (typeof data == "string") {
-			var cid	= prepareCids(cacheId);
+			cid	= prepareCids(cacheId);
 			
 			// Add now to the expired time, then convert to string to save it
 			expireTime = (parseInt(expireTime) + (new Date).getTime()).toString();
