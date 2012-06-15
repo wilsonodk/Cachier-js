@@ -1,5 +1,5 @@
 /**
- * Cachier (Cache -> Cash -> Cashier) Version 1.1
+ * Cachier (Cache -> Cash -> Cashier) Version 1.2
  *
  * Copyright (c) 2012 Wilson Wise http://wilson.odk.com
  * Cachier is licensed under a Creative Commons Attribution-NoDerivs 3.0 Unported License.
