@@ -1,16 +1,20 @@
 /**
- *	Cachier (Cache -> Cash -> Cashier) Version 1.1
- *	A localStorage wrapper/helper module. The base localStorage object in JS is
- *	a key/value store where value must be a string. This is pretty limiting, but
- *	easily worked around, and that's where Cachier comes in. Cachier handles 
- *	serializing and unserializing the data that is passed to it. It also sets an
- *	expire time, so that data can be refreshed when needed. 
- *	Provides three public methods; getItem, setItem, and removeItem.
+ * Cachier (Cache -> Cash -> Cashier) Version 1.1
  *
- *	JSON-js is required for use. https://github.com/douglascrockford/JSON-js
+ * Copyright (c) 2012 Wilson Wise http://wilson.odk.com
+ * Cachier is licensed under a Creative Commons Attribution-NoDerivs 3.0 Unported License.
  *
- *	Example usage:
- *	var myData = Cachier.getItem('cachedItem');
+ * A localStorage wrapper/helper module. The base localStorage object in JS is
+ * a key/value store where value must be a string. This is pretty limiting, but
+ * easily worked around, and that's where Cachier comes in. Cachier handles 
+ * serializing and unserializing the data that is passed to it. It also sets an
+ * expire time, so that data can be refreshed when needed. 
+ * Provides three public methods; getItem, setItem, and removeItem.
+ *
+ * JSON-js is required for use. https://github.com/douglascrockford/JSON-js
+ *
+ * Example usage:
+ * 	var myData = Cachier.getItem('cachedItem');
  *	if (myData.result) {
  *		// Use your data which is now in myData.data
  *	} else {
