@@ -1,5 +1,5 @@
 /**
- * Cachier (Cache -> Cash -> Cashier) Version 1.3
+ * Cachier (Cache -> Cash -> Cashier) Version 1.3.1
  *
  * Copyright (c) 2012 Wilson Wise http://wilson.odk.com
  * Cachier is licensed under a Creative Commons Attribution-NoDerivs 3.0 Unported License.
@@ -26,13 +26,11 @@
  *	// If needed, you can manually delete
  *	Cachier.removeItem('cachedItem');
  */
-var Cachier = (function(Json) {
+var Cachier = (function(window, Json, undefined) {
 		// Return object for public methods
 	var module		= {},
-		// Quick reference to window object
-		win			= this,
 		// Does localStorage exists?
-		lsExists	= typeof win.localStorage !== "undefined",
+		lsExists	= typeof window.localStorage !== "undefined",
 		// Namespaced key for cache data
 		dataCid		= "cachier:data:{cid}",
 		// Namespaced key for cache data type
@@ -76,7 +74,7 @@ var Cachier = (function(Json) {
 	function _exists(cacheId) {
 		var cid = _prepareCids(cacheId), val;
 		if (lsExists) {
-			val = win.localStorage.getItem(cid.data);
+			val = window.localStorage.getItem(cid.data);
 			return val !== null;
 		}
 		else {
@@ -127,12 +125,12 @@ var Cachier = (function(Json) {
 		if (lsExists) {
 			// Check if our content exists in cache
 			if (_exists(cacheId)) {
-				expireDate = parseInt(win.localStorage.getItem(cid.expire));
+				expireDate = parseInt(window.localStorage.getItem(cid.expire));
 				// Check if our cached content has expired
 				if (now < expireDate) {
 					// OK, we can proceed
-					dataType = win.localStorage.getItem(cid.type);
-					data	 = win.localStorage.getItem(cid.data);
+					dataType = window.localStorage.getItem(cid.type);
+					data	 = window.localStorage.getItem(cid.data);
 					
 					// Set the expires time
 					myData.expires = expireDate - now;
@@ -246,9 +244,9 @@ var Cachier = (function(Json) {
 
 			// Try to save them
 			try {
-				win.localStorage.setItem(cid.data, data);
-				win.localStorage.setItem(cid.type, dataType);
-				win.localStorage.setItem(cid.expire, expireTime);
+				window.localStorage.setItem(cid.data, data);
+				window.localStorage.setItem(cid.type, dataType);
+				window.localStorage.setItem(cid.expire, expireTime);
 			}
 			catch (error) {
 				return false;
@@ -271,9 +269,9 @@ var Cachier = (function(Json) {
 		try {
 			// Remove all three items
 			var cid	= _prepareCids(cacheId);
-			win.localStorage.removeItem(cid.data);
-			win.localStorage.removeItem(cid.type);
-			win.localStorage.removeItem(cid.expire);
+			window.localStorage.removeItem(cid.data);
+			window.localStorage.removeItem(cid.type);
+			window.localStorage.removeItem(cid.expire);
 		}
 		catch (error) {
 			// Something went wrong
@@ -282,4 +280,4 @@ var Cachier = (function(Json) {
 		return true;
 	};
 	return module;
-}(JSON));
+}(window, JSON));
