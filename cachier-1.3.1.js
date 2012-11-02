@@ -1,3 +1,4 @@
+/*globals window */
 /**
  * Cachier (Cache -> Cash -> Cashier) Version 1.3.1
  *
@@ -14,7 +15,7 @@
  * JSON-js is required for use. https://github.com/douglascrockford/JSON-js
  *
  * Example usage:
- * 	var myData = Cachier.getItem('cachedItem');
+ *  var myData = Cachier.getItem('cachedItem');
  *	if (myData.result) {
  *		// Use your data which is now in myData.data
  *	} else {
@@ -26,11 +27,12 @@
  *	// If needed, you can manually delete
  *	Cachier.removeItem('cachedItem');
  */
-var Cachier = (function(window, Json, undefined) {
-		// Return object for public methods
+var Cachier = (function (window, Json) {
+	"use strict";
+	// Return object for public methods
 	var module		= {},
 		// Does localStorage exists?
-		lsExists	= typeof window.localStorage !== "undefined",
+		lsExists	= window.localStorage === undefined ? false : true,
 		// Namespaced key for cache data
 		dataCid		= "cachier:data:{cid}",
 		// Namespaced key for cache data type
@@ -42,149 +44,144 @@ var Cachier = (function(window, Json, undefined) {
 		// One hour in milliseconds
 		defaultTime	= 60 * 60 * 1000,
 		// JSON.stringify for object serialization
-		serialize 	= Json.stringify,
+		serialize	= Json.stringify,
 		// JSON.parse for object deserialization
-		unserialize = Json.parse;
+		unserialize	= Json.parse;
 
 	/* Private helper functions */
 	/**
-	 * _prepareCids
+	 * prepareCids
 	 * @param	cid		A required string that is the key for all the cache tables
 	 * @return object	The return object will have three values that are the 
 	 *					prepared keys to be used in localStorage
 	 *					@value	data	String cache key for data
 	 *					@value	type	String cache key for data type
-	 *					@value 	expire	String cache key for expire time
+	 *					@value	expire	String cache key for expire time
 	 */
-	function _prepareCids(cid) {
+	function prepareCids(cid) {
 		return {
-			data: 	dataCid.replace(cidRegEx, cid),
-			type: 	typeCid.replace(cidRegEx, cid),
-			expire:	expireCid.replace(cidRegEx, cid)
+			data: dataCid.replace(cidRegEx, cid),
+			type: typeCid.replace(cidRegEx, cid),
+			expire: expireCid.replace(cidRegEx, cid)
 		};
 	}
 
 	/**
-	 * _exists 
+	 * exists 
 	 * Private helper that checks if a item is being managed by Cachier already
 	 *
 	 * @param	cacheId	A required string of the cache key to check
 	 * @return	A boolean value indicating whether it is being managed or not
 	 */
-	function _exists(cacheId) {
-		var cid = _prepareCids(cacheId), val;
+	function exists(cacheId) {
+		var cid = prepareCids(cacheId), val;
 		if (lsExists) {
-			val = window.localStorage.getItem(cid.data);
-			return val !== null;
+			val = window.localStorage.getItem(cid.data) !== null;
+		} else {
+			val = false;
 		}
-		else {
-			return false;
-		}
+		return val;
 	}
 
 	/* Public methods */
 	/**
 	 * exists
-	 * Public method that exposes the _exists functionality
+	 * Public method that exposes the exists functionality
 	 *
-	 * @param	cacheId	A required string of the cache key to check
-	 * @return	A boolean value indicating whether it is being managed or not
+	 * @param cacheId A required string of the cache key to check
+	 * @return A boolean value indicating whether it is being managed or not
 	 */
-	module.exists = function(cacheId) {
-		return _exists(cacheId);
-	}
+	module.exists = function (cacheId) {
+		exists(cacheId);
+	};
 
 	/**
 	 * getItem public method
-	 * @param 	cacheId	A required string that is the key for the item in cache 
-	 *					to be retrieved.
+	 * @param	cacheId	A required string that is the key for the item in cache to be retrieved.
 	 * @return object
-	 *		The return object has two or three values depending on the result 
-	 *		of the getItem. 
+	 *		The return object has two or three values depending on the result of the getItem. 
 	 *		@value cids   object	A hash of the localStorage keys that are being used
 	 *		@value data	  mixed		The data that was stored
 	 *		@value error  string	Message about the error that was thrown
 	 *		@value result boolean	Whether the getItem request was successful	 
 	 */
-	module.getItem = function(cacheId) {
-		var cid	= _prepareCids(cacheId),
+	module.getItem = function (cacheId) {
+		var cid	= prepareCids(cacheId),
 			// Need some numbers that represent dates
 			now	= (new Date()).getTime(),
 			expireDate,
+			dataType,
+			data,
 			// Result object
-			myData 	= {
-				cids: 	cid,
-				data:	"",
-				error:	null,
+			myData = {
+				cids: cid,
+				data: "",
+				error: null,
 				result: false,
 				expires: -1
-			},
-			dataType, data;
+			};
 
 		// Make sure localStorage is available
 		if (lsExists) {
 			// Check if our content exists in cache
-			if (_exists(cacheId)) {
-				expireDate = parseInt(window.localStorage.getItem(cid.expire));
+			if (exists(cacheId)) {
+				expireDate = parseInt(window.localStorage.getItem(cid.expire), 10);
 				// Check if our cached content has expired
 				if (now < expireDate) {
 					// OK, we can proceed
 					dataType = window.localStorage.getItem(cid.type);
 					data	 = window.localStorage.getItem(cid.data);
-					
+
 					// Set the expires time
 					myData.expires = expireDate - now;
 
 					// Get data
 					switch (dataType) {
-						case "object":
-							// Unserialize the data back to an object
-							myData.data   = unserialize(data);
-							myData.result = true;
-							break;
+					case "object":
+						// Unserialize the data back to an object
+						myData.data   = unserialize(data);
+						myData.result = true;
+						break;
 
-						case "number":
-							// Make a number from a string
-							myData.data   = Number(data);
-							myData.result = true;
-							break;
+					case "number":
+						// Make a number from a string
+						myData.data   = Number(data);
+						myData.result = true;
+						break;
 
-						case "boolean":
-							// We can retrieve boolean values easily enough
-							myData.data   = data == "true" ? true : false;
-							myData.result = true;
-							break;
+					case "boolean":
+						// We can retrieve boolean values easily enough
+						myData.data   = data === "true" ? true : false;
+						myData.result = true;
+						break;
 
-						case "string": 
-							// Don't need to do anything for strings
-							myData.data   = data;
-							myData.result = true;
-							break;
+					case "string":
+						// Don't need to do anything for strings
+						myData.data   = data;
+						myData.result = true;
+						break;
 
-						case "function":
-							myData.data   = "";
-							myData.result = false;
-							myData.error  = "Function was saved, unable to retrieve the value";
-							break;
+					case "function":
+						myData.data   = "";
+						myData.result = false;
+						myData.error  = "Function was saved, unable to retrieve the value";
+						break;
 
-						default:
-							myData.data   = "";
-							myData.result = false;
-							myData.error  = "Unknown data type was saved";
-							break;
+					default:
+						myData.data   = "";
+						myData.result = false;
+						myData.error  = "Unknown data type was saved";
+						break;
 					}
-				}
-				else {
+				} else {
 					// It's expired, so delete and return false
 					Cachier.removeItem(cacheId);
 					myData.error = "Expired in cache";
 				}
-			}
-			else {
+			} else {
 				myData.error = "Cache key undefined";
 			}
-		}
-		else {
+		} else {
 			myData.error = "The localStorage object is not supported";
 		}
 
@@ -194,65 +191,61 @@ var Cachier = (function(window, Json, undefined) {
 	/**
 	 * setItem public method
 	 * @param	cacheId	A required string that is the key for the item.
- 	 * @param	data	A required mixed value, this is the data to be stored.
-	 *					All types except functions are allowed. 
-	 * @param	expire	Optional number of milliseconds for how long the item 
-	 					should be stored before it is expired.
+	 * @param	data	A required mixed value, this is the data to be stored. All types except functions are allowed. 
+	 * @param	expire	Optional number of milliseconds for how long the item should be stored before it is expired.
 	 * @return	boolean
 	 *		True if the value was stored, false if it wasn't
 	 */
-	module.setItem = function(cacheId, data, expire) {
+	module.setItem = function (cacheId, data, expire) {
 		// Use the defaultTime if expire is not set
-		var expireTime	= expire || defaultTime,
-			dataType 	= typeof data,
+		var expireTime = expire || defaultTime,
+			dataType = typeof data,
 			cid;
 
 		// cacheId should be a string
-		if (typeof cacheId !== "string") return false;
+		if (typeof cacheId !== "string") {
+			return false;
+		}
 
 		// Check the type of data
 		switch (dataType) {
-			case "function":
-				// We don't support serializing functions
-				return false;
-				break;
+		case "function":
+			// We don't support serializing functions
+			data = "function";
+			break;
 
-			case "object":
-				// Serialize the object then store it
-				data = serialize(data);
-				break;
+		case "object":
+			// Serialize the object then store it
+			data = serialize(data);
+			break;
 
-			case "string":
-				// Don't have to do anything
-				break;
+		case "string":
+			// Don't have to do anything
+			break;
 
-			case "number":
-			case "boolean":
-			default:
-				// By default, let's try calling toString
-				// on data to convert it.
-				data = data.toString();
-				break;
+		default:
+			// By default, let's try calling toString on data to convert it.
+			// Number and Boolean should fall through to here.
+			data = data.toString();
+			break;
 		}
 
 		// Let's double-check we are a string
-		if (typeof data == "string") {
-			cid	= _prepareCids(cacheId);
+		if (typeof data === "string") {
+			cid	= prepareCids(cacheId);
 
 			// Add now to the expired time, then convert to string to save it
-			expireTime = (parseInt(expireTime) + (new Date).getTime()).toString();
+			expireTime = (parseInt(expireTime, 10) + (new Date()).getTime()).toString();
 
 			// Try to save them
 			try {
 				window.localStorage.setItem(cid.data, data);
 				window.localStorage.setItem(cid.type, dataType);
 				window.localStorage.setItem(cid.expire, expireTime);
-			}
-			catch (error) {
+			} catch (error) {
 				return false;
 			}
-		}
-		else {
+		} else {
 			return false;
 		}
 		// We haven't had an error, we must be OK, right?
@@ -264,16 +257,15 @@ var Cachier = (function(window, Json, undefined) {
 	 * @param	cacheId A required string, the cache key to be deleted.
 	 * @return boolean
 	 *		True if the content was deleted, false if it wasn't
- 	 */
-	module.removeItem = function(cacheId) {
+	 */
+	module.removeItem = function (cacheId) {
 		try {
 			// Remove all three items
-			var cid	= _prepareCids(cacheId);
+			var cid	= prepareCids(cacheId);
 			window.localStorage.removeItem(cid.data);
 			window.localStorage.removeItem(cid.type);
 			window.localStorage.removeItem(cid.expire);
-		}
-		catch (error) {
+		} catch (error) {
 			// Something went wrong
 			return false;
 		}
