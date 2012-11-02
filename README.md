@@ -9,14 +9,16 @@ for different types of objects as well as adding expire times.
 
 ## Example usage:
 
-    var myData = Cachier.getItem('cachedItem');
-    if (myData.result) {
-        // Use your data which is now in myData.data
-    } else {
-        // The data is expired, go fetch data.
-        var fetchedData = ...
-        // Now store it
-        Cachier.setItem('cachedItem', fetchedData);
-    }
-    // If needed, you can manually delete
-    Cachier.removeItem('cachedItem');
+```javascript
+var myData = Cachier.getItem('cachedItem');
+if (myData.result) {
+    // Use your data which is now in myData.data
+} else {
+    // The data is expired, go fetch data.
+    var fetchedData = ...
+    // Now store it
+    Cachier.setItem('cachedItem', fetchedData);
+}
+// If needed, you can manually delete
+Cachier.removeItem('cachedItem');
+```
